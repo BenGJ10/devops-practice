@@ -1,11 +1,11 @@
-pipeline{
-    agent any 
+pipeline {
+    agent any
 
     environment {
         APP_NAME = 'my-flask-app'
     }
 
-    stages{
+    stages {
 
         stage('Clone Repository') {
             steps {
@@ -15,19 +15,28 @@ pipeline{
 
         stage('Install Dependencies') {
             steps {
-                echo 'Installing dependencies...'                
+                echo 'Installing dependencies...'
+
                 sh '''
-                python3 -m venv venv
-                . venv/bin/activate
-                pip install -r requirements.txt
+                    python3 -m venv venv
+                    . venv/bin/activate
+
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
                 '''
             }
         }
 
         stage('Build Flask App') {
             steps {
-                echo 'Building ${APP_NAME}...'
-                sh 'python --version'
+                echo "Building ${APP_NAME}..."
+
+                sh '''
+                    . venv/bin/activate
+
+                    python --version
+                    pip --version
+                '''
             }
         }
 
@@ -36,9 +45,13 @@ pipeline{
                 echo 'Testing Flask application...'
 
                 sh '''
-                python3 app.py &
-                sleep 5
-                curl http://127.0.0.1:5010/health
+                    . venv/bin/activate
+
+                    python app.py > flask.log 2>&1 &
+
+                    sleep 10
+
+                    curl http://127.0.0.1:5010/health
                 '''
             }
         }
@@ -49,8 +62,9 @@ pipeline{
             }
         }
     }
-    
+
     post {
+
         success {
             echo 'Pipeline executed successfully'
         }
