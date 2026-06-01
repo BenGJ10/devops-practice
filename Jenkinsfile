@@ -16,7 +16,7 @@ pipeline{
         stage('Install Dependencies') {
             steps {
                 echo 'Installing dependencies...'
-                sh 'pip install -r requirements.txt'
+                sh 'python3 -m pip install -r requirements.txt'
             }
         }
 
@@ -32,7 +32,7 @@ pipeline{
                 echo 'Testing Flask application...'
 
                 sh '''
-                python app.py &
+                python3 app.py &
                 sleep 5
                 curl http://127.0.0.1:5010/health
                 '''
